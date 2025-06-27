@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug active file",
+      "request": "launch",
+
+      // VS Code macro that resolves to the class in the current editor
+      // (works so long as the class name == file name)
+      "mainClass": "${fileBasenameNoExtension}",
+
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  // ---------------- Java project layout ----------------
+  "java.project.sourcePaths": ["src"],
+  "java.project.outputPath": "out",
+  "java.project.referencedLibraries": ["lib/**/*.jar"],
+
+  // ---------------- Code Runner (⌃⌥-N) -----------------
+  "code-runner.runInTerminal": true,
+  "code-runner.fileDirectoryAsCwd": false,
+  "code-runner.executorMap": {
+    "java": "cd \"$workspaceRoot\" && javac -d out -cp \"lib/*\" src/*.java && java -cp \"out:lib/*\" \"$fileNameWithoutExt\""
+  }
+}
