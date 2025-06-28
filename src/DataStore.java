@@ -72,14 +72,14 @@ public class DataStore {
     /*
      * Return the list of Integer lists that represent the data
      */
-    List<List<Integer>> getData() {
+    public List<List<Integer>> getData() {
         return this.data;
     }
 
     /*
      * Return the list of Integers that represents the labels
      */
-    List<Integer> getLabels() {
+    public List<Integer> getLabels() {
         return this.labels;
     }
     
@@ -105,7 +105,7 @@ public class DataStore {
     /*
      * Convert party affiliation label (enum) into its corresponding label code (int)
      */
-    int PartyAffiliationToInt(PartyAffiliation affiliationLabel) {
+    int partyAffiliationToInt(PartyAffiliation affiliationLabel) {
         switch(affiliationLabel) {
             case PartyAffiliation.DEMOCRAT:
                 return 0;
@@ -121,6 +121,29 @@ public class DataStore {
         }
     }
     
-    
+    /*
+     * Convert nested list of data into a 2D array for ML processing
+     */
+    public static double[][] toDoubleMatrix(List<List<Integer>> data) {
+        int m = data.size();
+        int n = data.get(0).size();
+        double[][] dataMatrix = new double[m][n];
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                dataMatrix[i][j] = data.get(i).get(j);
+            }
+        }
+        return dataMatrix;
+    }
+
+
+    /*
+     * Convert list of labels into a vector (i.e. array) for ML processing
+     */
+    public static int[] toIntVector(List<Integer> labels) {
+        return labels.stream()
+                        .mapToInt(Integer::intValue)
+                        .toArray();
+    }
 
 }

@@ -1,4 +1,4 @@
-
+import smile.classification.LogisticRegression;
 
 public class _Test {
     public static void main(String[] args) {
@@ -12,6 +12,11 @@ public class _Test {
         } catch (CorruptDataException ex) {
             System.out.println(ex.getMessage());
         }
+
+        LogisticRegression model = ModelTrainer.getTrainedModel(
+            DataStore.toDoubleMatrix(testDataStore.getData()), 
+            DataStore.toIntVector(testDataStore.getLabels())
+        );
 
         System.out.println("\n");
         System.out.println("Basic Pass");
