@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import javax.management.RuntimeErrorException;
 public class DataStore {
     String dataFileName;
     private int numberOfFeatures;
+    private int dataSize = 0;
     private List<List<Integer>> data;
     private List<Integer> labels;
     
@@ -65,9 +67,52 @@ public class DataStore {
             System.err.println("\n");
         }
 
+        this.dataSize = rows.size();
         System.out.println();
 
     }
+
+    /*
+     * Save in-memory data from class data structure to persistent memory on disk
+     */
+    public void saveData() throws IOException {
+        String backupFileName = getBackupFileName(dataFileName);
+        File file = new File(dataFileName);
+
+        // Make a backup copy of the data file
+        File backupFile = new File(backupFileName);
+        Files.move(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        String dataString = "";
+        for (int i=0; i<dataSize; i++) {
+            for (int j=0; j<numberOfFeatures; j++) {
+                dataString += getData().get(i).get(j);
+                dataString += ",";
+            }
+            dataString += getLabels().get(i);
+        }
+        Files.writeString(
+            file.toPath(), 
+            dataString,
+            StandardOpenOption.CREATE, // Becuase file has been moved to a backup
+            StandardOpenOption.APPEND
+        );
+    }
+
+    /*
+     * Utility method to generate file name for backup file
+     */
+    private String getBackupFileName(String fileName) throws IllegalArgumentException {
+        String[] fileNameElements = fileName.split("\\.");
+        if (fileNameElements.length != 2) {
+            throw new IllegalArgumentException("Unexpected file name.");
+        }
+        String baseName = fileNameElements[0];
+        String extension = fileNameElements[1];
+        String backupFileName = baseName + "_bak." + extension;
+        return backupFileName;
+    }
+
 
     /*
      * Return the list of Integer lists that represent the data
@@ -81,6 +126,21 @@ public class DataStore {
      */
     public List<Integer> getLabels() {
         return this.labels;
+    }
+
+    /*
+     * Add new entry to internal data structures
+     */
+    public void addData(double[] vector, int label) {
+        if (vector.length != this.numberOfFeatures) {
+            throw new IllegalArgumentException("Unexpected number of features");
+        }
+        List<Integer> newEntry = new ArrayList<Integer>();
+        for (double number : vector) {
+            newEntry.add((int) number);
+        }
+        this.labels.add(label);
+
     }
     
     /*
