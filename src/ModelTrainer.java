@@ -30,17 +30,7 @@ public class ModelTrainer {
         // Get stratified indices for the split
         int numberOfFoldsInternal = 5;
         Bag[] bagsInternal = CrossValidation.stratify(trainingLabels, numberOfFoldsInternal);
-        Bag splitInternal = bagsInternal[0];
-        int[] trainingIndicesInternal = splitInternal.samples(); // indices of internal training samples
-        int[] testingIndicesInternal = splitInternal.oob(); // indices of testing (validation)
-        
-        // Setup data using the indices of the internal split
-        double[][] trainingDataInternal = MathEx.slice(trainingData, trainingIndicesInternal);
-        int[] trainingLabelsInternal = MathEx.slice(trainingLabels, trainingIndicesInternal);
-        double[][] testDataInternal = MathEx.slice(trainingData, testingIndicesInternal);
-        int[] testLabelsInternal = MathEx.slice(trainingLabels, testingIndicesInternal);
         // ------------------------------------------------------
-
 
         // Search space for hyper-parameters
         double[] lambdaRange = new double[]{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1};
@@ -55,15 +45,33 @@ public class ModelTrainer {
         for (double lambda : lambdaRange) {
             for (double tolerance : toleranceRange) {
                 for (int maxIter : maxIterRange) {
-                       
-                    LogisticRegression.Options options = new LogisticRegression.Options(lambda, tolerance, maxIter);
-                    LogisticRegression.Multinomial model = LogisticRegression.multinomial(trainingDataInternal, trainingLabelsInternal, options);
-                    int[] prediction = model.predict(testDataInternal);
-                    double currentAccuracy = Accuracy.of(testLabelsInternal, prediction);
-                    System.out.println("\nCurrent Accuracy: " + currentAccuracy);
+                    double totalAccuracy = 0;
+                    int numberOfInternalBags = bagsInternal.length;
+                    
+                    for (int i=0; i<numberOfInternalBags; i++) {
+                        // ------------------------------------------------------
+                        Bag splitInternal = bagsInternal[i];
+                        int[] trainingIndicesInternal = splitInternal.samples(); // indices of internal training samples
+                        int[] testingIndicesInternal = splitInternal.oob(); // indices of testing (validation)
+                        
+                        // Setup data using the indices of the internal split
+                        double[][] trainingDataInternal = MathEx.slice(trainingData, trainingIndicesInternal);
+                        int[] trainingLabelsInternal = MathEx.slice(trainingLabels, trainingIndicesInternal);
+                        double[][] testDataInternal = MathEx.slice(trainingData, testingIndicesInternal);
+                        int[] testLabelsInternal = MathEx.slice(trainingLabels, testingIndicesInternal);
+                        // ------------------------------------------------------
+                    
+                        LogisticRegression.Options options = new LogisticRegression.Options(lambda, tolerance, maxIter);
+                        LogisticRegression.Multinomial model = LogisticRegression.multinomial(trainingDataInternal, trainingLabelsInternal, options);
+                        int[] prediction = model.predict(testDataInternal);
+                        double currentAccuracy = Accuracy.of(testLabelsInternal, prediction);
+                        totalAccuracy += currentAccuracy;
+                    }
 
-                    if (currentAccuracy > bestAccuracy) {
-                        bestAccuracy = currentAccuracy;
+                    double meanCurrentAccuracy = totalAccuracy / numberOfInternalBags;
+                    System.out.println("\nMean Current Accuracy: " + meanCurrentAccuracy);
+                    if (meanCurrentAccuracy > bestAccuracy) {
+                        bestAccuracy = meanCurrentAccuracy;
                         bestLambda = lambda;
                         bestTolerance = tolerance;
                         bestMaxIter = maxIter;
