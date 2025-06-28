@@ -4,7 +4,7 @@ public class _Test {
     public static void main(String[] args) {
         System.out.println("\n");
 
-        String fileName = "data/data.csv";
+        String fileName = "data/data_1000.csv";
         int numberOfFeatures = 12;
         DataStore testDataStore = new DataStore(fileName, numberOfFeatures);
         try {
