@@ -1,10 +1,10 @@
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class CLI {
-    private static final int NUMBER_OF_FEATURES = 12;
-    Question[] questions;
-    Scanner cliScanner;
+    // private static final int NUMBER_OF_FEATURES = 12;
+    private Question[] questionsMain;
+    private Question finalQuestion;
+    private Scanner cliScanner;
 
     private static class Question {
         String question;
@@ -81,17 +81,7 @@ public class CLI {
             commonAnswerOptions2
         );
 
-        Question finalQuestion = new Question(
-            "Please select party affiliation that best describes you:", 
-            new String[]{
-                "Democratic / lean Democratic.", 
-                "Republican / lean Republican.", 
-                "Independent.",
-                "Other / 3rd Party (ex. Green, Libertarian, etc.)"
-            }
-        );
-
-        this.questions = new Question[]{
+        this.questionsMain = new Question[]{
             question1,
             question2,
             question3,
@@ -104,21 +94,29 @@ public class CLI {
             question10,
             question11,
             question12,
-            finalQuestion
         };
 
-        cliScanner = new Scanner(System.in);
+        finalQuestion = new Question(
+            "Please select party affiliation that best describes you:", 
+            new String[]{
+                "Democratic / lean Democratic.", 
+                "Republican / lean Republican.", 
+                "Independent.",
+                "Other / 3rd Party (ex. Green, Libertarian, etc.)"
+            }
+        );
+
+        this.cliScanner = new Scanner(System.in);        
     }
 
+    
     /*
-     * Conduct the survey by presenting the user with the questionnaire and collecting
-     * responces in to a numerical array, returning it in the end
+     * Conduct the main portion of the survey, gathering features data
      */
-    public double[] conductSurvey() {
+    public double[] conductSurveyMain() {
         String systemMessageMain = "For the purpose of this survey, if your response would have been different in the year 2024 than it is now due to a change in policy or events other than any change in your personal views, please provide the response as it would have been in 2024.";
         String systemMessage2 = "Note: if the screen seems frozen, press ENTER";
         String horizontalBar = "=========================";
-        double[] responces = new double[NUMBER_OF_FEATURES+1];
 
         System.out.println("\n\n");
         System.out.println(systemMessage2);
@@ -126,9 +124,47 @@ public class CLI {
         System.out.println(horizontalBar);
         System.out.println(systemMessageMain);
         System.out.println("\n");
-        for (int i=0; i<questions.length; i++) {
-            
-            Question question = questions[i];
+
+
+        return executeCoreQuestionnaire(questionsMain);
+    }
+
+    /*
+     * conduct final portion of the survey (father label)
+     */
+    public int conductSurveyFinal() {
+        Question[] subQuestions = new Question[]{finalQuestion};
+        double[] responceArr = executeCoreQuestionnaire(subQuestions);
+        int finalResponce = (int)responceArr[0];
+        
+        return finalResponce;
+    }
+
+    /*
+     * Check if the user wants to conduct another survey
+     */
+    public int checkRepeat() {
+        Question surveyAgain = new Question(
+            "Would you like to conduct another survey?",
+            new String[]{
+                "Yes",
+                "No (Quit)"
+            }
+        );
+        Question[] subQuestions = new Question[]{surveyAgain};
+        double[] responcesArr = executeCoreQuestionnaire(subQuestions);
+
+        return (int)responcesArr[0];
+    }
+
+    /*
+     * Conduct a survey by presenting the user with the questionnaire and collecting
+     * responces in to a numerical array, returning it in the end
+    */
+    private double[] executeCoreQuestionnaire(Question[] subQuestions) {
+        double[] responces = new double[subQuestions.length];
+        for (int i=0; i<subQuestions.length; i++) {    
+            Question question = subQuestions[i];
             double userInput = -1;
             int NumberOfAnswerOpts = question.answerOptions.length;
 
@@ -170,7 +206,7 @@ public class CLI {
             }
 
             responces[i] = userInput;
-            System.out.println();           
+            System.out.println();
         }
 
         return responces;
@@ -181,14 +217,6 @@ public class CLI {
         if (cliScanner.hasNextLine()) {
             cliScanner.nextLine();
         }
-    }
-
-
-    // For Testing
-    public static void main(String[] args) {
-        CLI cli = new CLI();
-        double[] answers = cli.conductSurvey();
-        System.out.println(Arrays.toString(answers));
     }
     
 }

@@ -13,13 +13,6 @@ public class Predictor {
     }
 
     private void setModel(TrainingMode mode) {
-        try {
-            dataStorage.loadData();
-        } catch (CorruptDataException ex) {
-            System.out.println("Error loading Data");
-            System.out.println(ex.getMessage());
-            System.exit(1);
-        }
         double[][] trainingData = DataStore.toDoubleMatrix(dataStorage.getData());
         int[] trainingLabels = DataStore.toIntVector(dataStorage.getLabels());
         switch(mode) {
@@ -43,6 +36,10 @@ public class Predictor {
      */
     public void retrainModel() {
         setModel(TrainingMode.REUSE_OPTIONS);  
+    }
+
+    public ModelTrainer.TrainedModel getModel() {
+        return trainedModel;
     }
     
 }
