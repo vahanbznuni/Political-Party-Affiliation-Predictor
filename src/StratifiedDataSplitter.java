@@ -9,52 +9,64 @@ public class StratifiedDataSplitter {
     private double[][] masterData;
     private int[] masterLabels;
     private int numberOfFolds;
-    private DataBlock trainSet;
-    private DataBlock testSet;
+    private Bag[] bags;
 
     public StratifiedDataSplitter(double[][] data, int[] labels, int numberOfFolds) {
         this.masterData = data;
         this.masterLabels = labels;
         this.numberOfFolds = numberOfFolds;
-        this.initializeSplit();
-
+        this.bags = CrossValidation.stratify(masterLabels, numberOfFolds);
     }
 
-    private void initializeSplit() {
-        // Split data into training/validation and hold-out test sets
-        // Get stratified indices for the split
-        Bag[] bags = CrossValidation.stratify(this.masterLabels, numberOfFolds);
-        Bag split = bags[0];
+    
+    public DataBlock getDataBlock(int FoldIndex) {
+        if (FoldIndex >= numberOfFolds || FoldIndex < 0) {
+            throw new IllegalArgumentException("FoldIndex needs to be between 0 and " + numberOfFolds);
+        }
+
+        // Get indices of the specified fold of the stratified split
+        Bag split = bags[FoldIndex];
         int[] trainingIndices = split.samples(); // indices of training samples
-        int[] testingIndices = split.oob(); // indices of holdout, aka out-of-bag (oob) test set
-
-        // Setup data using the indices of the split
-
-        // Train
+        int[] testingIndices = split.oob(); // indices of holdout, aka out-of-bag (oob) test set        
+        
+        // get Train Set
         double[][] trainingData = MathEx.slice(masterData, trainingIndices);
         int[] trainingLabels = MathEx.slice(masterLabels, trainingIndices);
-        this.trainSet = new DataBlock(trainingData, trainingLabels);
+        DataSet trainSet = new DataSet(trainingData, trainingLabels);
         
-        // Test
+        // get Test Set
         double[][] testData = MathEx.slice(masterData, testingIndices);
         int[] testLabels = MathEx.slice(masterLabels, testingIndices);
-        this.testSet = new DataBlock(testData, testLabels);      
-    }
-
-    public DataBlock getTrainSet() {
-        return this.trainSet;
-    }
-
-    public DataBlock getTestSet() {
-        return this.testSet;
+        DataSet testSet = new DataSet(testData, testLabels);
+        
+        return new DataBlock(trainSet, testSet);        
     }
 
 
     class DataBlock {
+        private final DataSet trainSet;
+        private final DataSet testSet;
+
+        public DataBlock(DataSet trainSet, DataSet testSet) {
+            this.trainSet = trainSet;
+            this.testSet = testSet;
+        }
+
+        public DataSet getTrainSet() {
+            return trainSet;
+        }
+
+        public DataSet getTestSet() {
+            return testSet;
+        }
+    }
+
+
+    class DataSet {
         private double[][] data;
         private int[] labels;
 
-        public DataBlock(double[][] data, int[] labels) {
+        public DataSet(double[][] data, int[] labels) {
             this.data = data;
             this.labels = labels;
         }    
