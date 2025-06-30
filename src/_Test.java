@@ -18,7 +18,10 @@ public class _Test {
 
         System.out.println("\n");
         System.out.println("\n");
-        System.out.println(trainedModel.getMeasuredAccuracy());
+        System.out.println(trainedModel.getModelMetrics().getMeasuredAccuracy());
+        System.out.println(trainedModel.getModelMetrics().getMeasuredRecall());
+        System.out.println(trainedModel.getModelMetrics().getPrecision());
+        System.out.println(trainedModel.getModelMetrics().getF1Score());
 
         System.out.println("\n");
         System.out.println("Basic Pass");

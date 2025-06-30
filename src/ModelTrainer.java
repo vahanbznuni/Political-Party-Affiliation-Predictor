@@ -1,5 +1,9 @@
 import smile.classification.LogisticRegression;
 import smile.validation.metric.Accuracy;
+import smile.validation.metric.Averaging;
+import smile.validation.metric.Precision;
+import smile.validation.metric.Recall;
+import smile.validation.metric.FScore;
 
 
 public class ModelTrainer {
@@ -18,17 +22,17 @@ public class ModelTrainer {
 
 
     /*
-     * Wrapper class for a trained model and its performance metrics
+     * Wrapper class for holding a trained model, performance metrix set, and options set
      */
     public static class TrainedModel {
         private final LogisticRegression.Multinomial model;
         private final LogisticRegression.Options options;
-        private final double measuredAccuracy;
+        private final ModelMetrics modelMetrics;
 
-        public TrainedModel(LogisticRegression.Multinomial model, LogisticRegression.Options options, double measuredAccuracy) {
+        public TrainedModel(LogisticRegression.Multinomial model, LogisticRegression.Options options, ModelMetrics modelMetrics) {
             this.model = model;
             this.options = options;
-            this.measuredAccuracy = measuredAccuracy;
+            this.modelMetrics = modelMetrics;
         }
 
         public LogisticRegression.Multinomial getModel() {
@@ -39,9 +43,48 @@ public class ModelTrainer {
             return options;
         }
 
+        public ModelMetrics getModelMetrics() {
+            return modelMetrics;
+        }
+    }
+
+    /*
+     * Wrapper class for model performance metrics
+     */
+    public static class ModelMetrics {
+        private final double measuredAccuracy;
+        private final double measuredRecall;
+        private final double precision;
+        private final double f1Score;
+
+        public ModelMetrics(
+            double measuredAccuracy, 
+            double measuredRecall, 
+            double precision, 
+            double f1Score
+        ) {
+            this.measuredAccuracy = measuredAccuracy;
+            this.measuredRecall = measuredRecall;
+            this.precision = precision;
+            this.f1Score = f1Score;
+        }
+
         public double getMeasuredAccuracy() {
             return measuredAccuracy;
         }
+
+        public double getMeasuredRecall() {
+            return measuredRecall;
+        }
+
+        public double getPrecision() {
+            return precision;
+        }
+
+        public double getF1Score() {
+            return f1Score;
+        }
+
     }
 
 
@@ -66,10 +109,12 @@ public class ModelTrainer {
         // package model and metrics into a TrainedModel wrapper, and return it
         int[] finalPrediction = finalModel.predict(masterTestingData);
         double finalAccuracy = Accuracy.of(masterTestingLabels, finalPrediction);
-        // OTHER METRICS HERE ... <------
+        double finalPrecision = Precision.of(masterTestingLabels, finalPrediction, Averaging.Weighted);
+        double finalRecall = Recall.of(masterTestingLabels, finalPrediction, Averaging.Weighted);
+        double finalF1Score = FScore.of(masterTestingLabels, finalPrediction, 1, Averaging.Weighted);
+        ModelMetrics modelMetrics = new ModelMetrics(finalAccuracy, finalRecall, finalPrecision, finalF1Score);
 
-
-        return new ModelTrainer.TrainedModel(finalModel, options, finalAccuracy);
+        return new ModelTrainer.TrainedModel(finalModel, options, modelMetrics);
     }
 
 
