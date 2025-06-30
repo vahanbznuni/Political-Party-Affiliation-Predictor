@@ -1,29 +1,34 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.management.RuntimeErrorException;
-
 public class DataStore {
     String dataFileName;
-    private int numberOfFeatures;
+    private static final int NUMBER_OF_FEATURES = 12;
     private int dataSize = 0;
-    private List<List<Integer>> data;
+    private List<List<Double>> data;
     private List<Integer> labels;
+
+    private static enum EncodingDirection {
+        FORWARD,
+        REVERSE
+    }
+
     
-    public DataStore(String dataFileName, int numberOfFeatures) {
+    public DataStore(String dataFileName) {
         this.dataFileName = dataFileName;
-        this.numberOfFeatures = numberOfFeatures;
-        this.data = new ArrayList<List<Integer>>();
+        this.data = new ArrayList<List<Double>>();
         this.labels = new ArrayList<Integer>();
     }
+
+    // private HashMap< getInputToEncodingMap()
 
     /*
      * Load data from a provided CSV file
@@ -37,16 +42,16 @@ public class DataStore {
         List<String> rows = new ArrayList<>();
         
         try {
-            int expectedColumns = numberOfFeatures + 1;
+            int expectedColumns = NUMBER_OF_FEATURES + 1;
             rows = Files.readAllLines(file.toPath());
             // start iteration at index 1, since we expect a header row at idx 0
             
             for (int i=1; i<rows.size(); i++) {
-                // Read line of comma-separated numerical strings, convert them into Integers
-                // and store them in a list of Integers called sample
-                List<Integer> sample = Arrays.stream(rows.get(i).split(","))
+                // Read line of comma-separated numerical strings, convert them into Doubles
+                // and store them in a list of Doubles called sample
+                List<Double> sample = Arrays.stream(rows.get(i).split(","))
                                                 .map(String::trim)
-                                                .map(Integer::valueOf)
+                                                .map(Double::valueOf)
                                                 .collect(Collectors.toList());
                 
                 // Check to ensure the row contains the expected number of elements
@@ -56,8 +61,8 @@ public class DataStore {
                 }
                 
                 // Extract input vector and label from sample list and save them to their respective lists
-                data.add(sample.subList(0, numberOfFeatures));
-                labels.add(sample.get(numberOfFeatures));
+                data.add(sample.subList(0, NUMBER_OF_FEATURES));
+                labels.add(sample.get(NUMBER_OF_FEATURES).intValue());
             }
 
         } catch (IOException ex) {
@@ -85,7 +90,7 @@ public class DataStore {
 
         String dataString = "";
         for (int i=0; i<dataSize; i++) {
-            for (int j=0; j<numberOfFeatures; j++) {
+            for (int j=0; j<NUMBER_OF_FEATURES; j++) {
                 dataString += getData().get(i).get(j);
                 dataString += ",";
             }
@@ -115,9 +120,9 @@ public class DataStore {
 
 
     /*
-     * Return the list of Integer lists that represent the data
+     * Return the list of Double lists that represent the data
      */
-    public List<List<Integer>> getData() {
+    public List<List<Double>> getData() {
         return this.data;
     }
 
@@ -132,12 +137,12 @@ public class DataStore {
      * Add new entry to internal data structures
      */
     public void addData(double[] vector, int label) {
-        if (vector.length != this.numberOfFeatures) {
+        if (vector.length != this.NUMBER_OF_FEATURES) {
             throw new IllegalArgumentException("Unexpected number of features");
         }
-        List<Integer> newEntry = new ArrayList<Integer>();
+        List<Double> newEntry = new ArrayList<Double>();
         for (double number : vector) {
-            newEntry.add((int) number);
+            newEntry.add((Double) number);
         }
         this.labels.add(label);
 
@@ -184,7 +189,7 @@ public class DataStore {
     /*
      * Convert nested list of data into a 2D array for ML processing
      */
-    public static double[][] toDoubleMatrix(List<List<Integer>> data) {
+    public static double[][] toDoubleMatrix(List<List<Double>> data) {
         int m = data.size();
         int n = data.get(0).size();
         double[][] dataMatrix = new double[m][n];

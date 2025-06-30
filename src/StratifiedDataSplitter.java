@@ -15,6 +15,7 @@ public class StratifiedDataSplitter {
     public StratifiedDataSplitter(double[][] data, int[] labels, int numberOfFolds) {
         this.masterData = data;
         this.masterLabels = labels;
+        this.numberOfFolds = numberOfFolds;
         this.initializeSplit();
 
     }
