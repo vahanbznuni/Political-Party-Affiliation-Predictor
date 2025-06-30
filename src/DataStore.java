@@ -5,7 +5,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -137,7 +136,7 @@ public class DataStore {
      * Add new entry to internal data structures
      */
     public void addData(double[] vector, int label) {
-        if (vector.length != this.NUMBER_OF_FEATURES) {
+        if (vector.length != NUMBER_OF_FEATURES) {
             throw new IllegalArgumentException("Unexpected number of features");
         }
         List<Double> newEntry = new ArrayList<Double>();
