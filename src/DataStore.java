@@ -5,14 +5,12 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DataStore {
     String dataFileName;
     private static final int NUMBER_OF_FEATURES = 12;
-    private int dataSize = 0;
     private List<List<Double>> data;
     private List<Integer> labels;
 
@@ -28,7 +26,9 @@ public class DataStore {
         this.labels = new ArrayList<Integer>();
     }
 
-    // private HashMap< getInputToEncodingMap()
+    public int getSize() {
+        return data.size();
+    }
 
     /*
      * Load data from a provided CSV file
@@ -37,7 +37,7 @@ public class DataStore {
      * 
      * It throws an error if there are any rows that do not contain the right number of columns
      */
-    public void loadData() throws CorruptDataException {
+    public void loadData() throws CorruptDataException, IOException {
         File file = new File(dataFileName);
         List<String> rows = new ArrayList<>();
         
@@ -70,9 +70,9 @@ public class DataStore {
             System.err.println("\n\n");
             System.err.println(ex);
             System.err.println("\n");
+            throw ex;
         }
 
-        this.dataSize = rows.size();
         System.out.println();
 
     }
@@ -88,13 +88,19 @@ public class DataStore {
         File backupFile = new File(backupFileName);
         Files.move(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-        String dataString = "";
-        for (int i=0; i<dataSize; i++) {
+        StringBuilder dataString = new StringBuilder();
+
+        // Write header row
+        dataString.append("ticket_split,party_fit,more_parties,inflation,deficit")
+        .append("immigration,guns,morals,climate,terrorism,economy,crime,label")
+        .append(System.lineSeparator());
+
+        for (int i=0; i<getSize(); i++) {
             for (int j=0; j<NUMBER_OF_FEATURES; j++) {
-                dataString += getData().get(i).get(j);
-                dataString += ",";
+                dataString.append(getData().get(i).get(j))
+                .append(",");
             }
-            dataString += getLabels().get(i);
+            dataString.append(getLabels().get(i)).append(System.lineSeparator());
         }
         Files.writeString(
             file.toPath(), 
@@ -137,13 +143,14 @@ public class DataStore {
      * Add new entry to internal data structures
      */
     public void addData(double[] vector, int label) {
-        if (vector.length != this.NUMBER_OF_FEATURES) {
+        if (vector.length != NUMBER_OF_FEATURES) {
             throw new IllegalArgumentException("Unexpected number of features");
         }
         List<Double> newEntry = new ArrayList<Double>();
         for (double number : vector) {
             newEntry.add((Double) number);
         }
+        this.data.add(newEntry);
         this.labels.add(label);
 
     }
@@ -151,7 +158,7 @@ public class DataStore {
     /*
      * Convert party affiliation label code into its corresponding affiliation label (enum)
      */
-    PartyAffiliation intToPartyAffiliation(int labelCode) {
+    public static PartyAffiliation intToPartyAffiliation(int labelCode) {
         switch(labelCode) {
             case 0:
                 return PartyAffiliation.DEMOCRAT;
@@ -170,7 +177,7 @@ public class DataStore {
     /*
      * Convert party affiliation label (enum) into its corresponding label code (int)
      */
-    int partyAffiliationToInt(PartyAffiliation affiliationLabel) {
+    public static int partyAffiliationToInt(PartyAffiliation affiliationLabel) {
         switch(affiliationLabel) {
             case PartyAffiliation.DEMOCRAT:
                 return 0;
@@ -209,6 +216,18 @@ public class DataStore {
         return labels.stream()
                         .mapToInt(Integer::intValue)
                         .toArray();
+    }
+
+    
+    public static EncodingDirection getEncodingDirection(int featureNumber) {
+        switch(featureNumber) {
+            case 0, 3, 4, 5, 6, 7, 8, 9, 10, 11:
+                return EncodingDirection.REVERSE;
+            case 1, 2, 12:
+                return EncodingDirection.FORWARD;
+            default:
+                throw new IllegalArgumentException("Unexpected input received");
+        }
     }
 
 }
