@@ -211,4 +211,16 @@ public class DataStore {
                         .toArray();
     }
 
+    
+    public static EncodingDirection getEncodingDirection(int featureNumber) {
+        switch(featureNumber) {
+            case 0, 3, 4, 5, 6, 7, 8, 9, 10, 11:
+                return EncodingDirection.REVERSE;
+            case 1, 2, 12:
+                return EncodingDirection.FORWARD;
+            default:
+                throw new IllegalArgumentException("Unexpected input received");
+        }
+    }
+
 }

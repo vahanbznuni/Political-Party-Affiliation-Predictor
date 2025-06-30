@@ -7,7 +7,9 @@ public class _Test {
         try {
             testDataStore.loadData();
         } catch (CorruptDataException ex) {
+            System.out.println("Error loading Data");
             System.out.println(ex.getMessage());
+            System.exit(1);
         }
 
         double[][] trainingData = DataStore.toDoubleMatrix(testDataStore.getData());
