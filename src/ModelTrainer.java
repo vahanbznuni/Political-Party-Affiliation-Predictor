@@ -4,7 +4,22 @@ import smile.validation.metric.Accuracy;
 
 public class ModelTrainer {
     private static final int DEFAULT_NUM_FOLDS = 5;
+    private final double[][] masterData; // <-- Delete if ultimately not utilized
+    private final int[] masterLabels; // <-- Delete if ultimately not utilized
+    private final StratifiedDataSplitter masterDataSplitter;
 
+
+    public ModelTrainer(double[][] masterData, int[] masterLabels) {
+        this.masterData = masterData;
+        this.masterLabels = masterLabels;
+        // Split master data/labels into training/validation (80%) and hold-out test (20%) data sets       
+        this.masterDataSplitter = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS);
+    }
+
+
+    /*
+     * Wrapper class for a trained model and its performance metrics
+     */
     public static class TrainedModel {
         private final LogisticRegression.Multinomial model;
         private final LogisticRegression.Options options;
@@ -27,51 +42,61 @@ public class ModelTrainer {
         public double getMeasuredAccuracy() {
             return measuredAccuracy;
         }
-
     }
 
-    public static TrainedModel getTrainedModel(double[][] data, int[] labels, LogisticRegression.Options options) {
-        // Split data into training/validation (80%) and hold-out test (20%) sets       
-        StratifiedDataSplitter dataSplitter = new StratifiedDataSplitter(data, labels, DEFAULT_NUM_FOLDS);
-        double[][] trainingData = dataSplitter.getTrainSet().getData();
-        int[] trainingLabels = dataSplitter.getTrainSet().getLabels();
-        double[][] testData = dataSplitter.getTestSet().getData();
-        int[] testLabels = dataSplitter.getTestSet().getLabels();
+
+    /*
+     * Get a packaged model with metrics, trained using provided options
+     */
+    public TrainedModel getTrainedModel(LogisticRegression.Options options) { 
+        // Get master training data set (from stratified data split)
+        StratifiedDataSplitter.DataSet masterTrainingSet = masterDataSplitter.getDataBlock(0).getTrainSet();
+        double[][] masterTrainingData = masterTrainingSet.getData();
+        int[] masterTrainingLabels = masterTrainingSet.getLabels();
+
+        // Train a model using the master training data and provided options
+        LogisticRegression.Multinomial finalModel = LogisticRegression.multinomial(masterTrainingData, masterTrainingLabels, options);
         
-        LogisticRegression.Multinomial finalModel = LogisticRegression.multinomial(trainingData, trainingLabels, options);
-        
-        // Measure accuracy, package model into a TrainedModel wrapper, and return it
-        int[] finalPrediction = finalModel.predict(testData);
-        double finalAccuracy = Accuracy.of(testLabels, finalPrediction);
+        // Get master testing data set (from stratified data split)
+        StratifiedDataSplitter.DataSet masterTestingSet = masterDataSplitter.getDataBlock(0).getTestSet();
+        double[][] masterTestingData = masterTestingSet.getData();
+        int[] masterTestingLabels = masterTestingSet.getLabels();  
+
+        // Measure performance metrics using holdout master test data set
+        // package model and metrics into a TrainedModel wrapper, and return it
+        int[] finalPrediction = finalModel.predict(masterTestingData);
+        double finalAccuracy = Accuracy.of(masterTestingLabels, finalPrediction);
+        // OTHER METRICS HERE ... <------
+
 
         return new ModelTrainer.TrainedModel(finalModel, options, finalAccuracy);
     }
 
-    public static TrainedModel getTrainedModel(double[][] data, int[] labels) {
-        // Split data into training/validation (80%) and hold-out test (20%) sets       
-        StratifiedDataSplitter dataSplitter = new StratifiedDataSplitter(data, labels, DEFAULT_NUM_FOLDS);
-        double[][] trainingData = dataSplitter.getTrainSet().getData();
-        int[] trainingLabels = dataSplitter.getTrainSet().getLabels();
 
-        // Find hyper-parameters through tuning
-        LogisticRegression.Options finalOptions = getTunedOptions(trainingData, trainingLabels); // performs grid search and returns hyper-params
+    /*
+    * Get a packaged model with metrics, trained using options found with grid-search tuning
+    */
+    public TrainedModel getTrainedModel() {
+        // Find hyper-parameters through tuning (using grid-search)
+        LogisticRegression.Options finalOptions = getTunedOptions();
 
         // Call overloaded method to train and return final model using found hyperparameters
-        return getTrainedModel(data, labels, finalOptions);
-
+        return getTrainedModel(finalOptions);
     }
 
-    public static LogisticRegression.Options getTunedOptions(double[][] trainingData, int[] trainingLabels) {
-        // Split data further into training and validation sets     
-        int numberOfFolds = 5; 
-        StratifiedDataSplitter dataSplitter = new StratifiedDataSplitter(trainingData, trainingLabels, numberOfFolds);
-        double[][] trainingDataInternal = dataSplitter.getTrainSet().getData();
-        int[] trainingLabelsInternal = dataSplitter.getTrainSet().getLabels();
-        double[][] testDataInternal = dataSplitter.getTestSet().getData();
-        int[] testLabelsInternal = dataSplitter.getTestSet().getLabels();
-        // ------------------------------------------------------
 
+    /*
+     * Perform model tuning using hyper-parameter grid search and get best parameters (i.e. options)
+     */
+    public LogisticRegression.Options getTunedOptions() {
+        // Get master training data set (from stratified data split)
+        StratifiedDataSplitter.DataSet masterTrainingSet = masterDataSplitter.getDataBlock(0).getTrainSet();
+        double[][] masterTrainingData = masterTrainingSet.getData();
+        int[] masterTrainingLabels = masterTrainingSet.getLabels();
 
+        // Split traiing data further into training and testing subsets for validation
+        StratifiedDataSplitter validationSplitter = new StratifiedDataSplitter(masterTrainingData, masterTrainingLabels, DEFAULT_NUM_FOLDS);
+        
         // Search space for hyper-parameters
         double[] lambdaRange = new double[]{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1};
         double[] toleranceRange = new double[]{1e-4, 1e-5, 1e-6};
@@ -85,15 +110,33 @@ public class ModelTrainer {
         for (double lambda : lambdaRange) {
             for (double tolerance : toleranceRange) {
                 for (int maxIter : maxIterRange) {
-                       
-                    LogisticRegression.Options options = new LogisticRegression.Options(lambda, tolerance, maxIter);
-                    LogisticRegression.Multinomial model = LogisticRegression.multinomial(trainingDataInternal, trainingLabelsInternal, options);
-                    int[] prediction = model.predict(testDataInternal);
-                    double currentAccuracy = Accuracy.of(testLabelsInternal, prediction);
-                    System.out.println("\nCurrent Accuracy: " + currentAccuracy);
+                    // Running total Accuracy measure for measuring mean across Cross-Validaiton folds
+                    double runningTotalAccuracy = 0;
+                    for (int i=0; i<DEFAULT_NUM_FOLDS; i++) {
+                        // Get validation training data set (from 2nd stratified data split)
+                        StratifiedDataSplitter.DataSet validationTrainingSet = validationSplitter.getDataBlock(i).getTrainSet();
+                        double[][] validationTrainingData = validationTrainingSet.getData();
+                        int[] validationTrainingLabels = validationTrainingSet.getLabels();
+        
+                        // Train a model using the validation training data and current options
+                        LogisticRegression.Options options = new LogisticRegression.Options(lambda, tolerance, maxIter);
+                        LogisticRegression.Multinomial model = LogisticRegression.multinomial(validationTrainingData, validationTrainingLabels, options);
+                        
+                        // Get validation testing data set (from 2nd stratified data split)
+                        StratifiedDataSplitter.DataSet validationTestingSet = validationSplitter.getDataBlock(i).getTestSet();
+                        double[][] validationTestingData = validationTestingSet.getData();
+                        int[] validationTestingLabels = validationTestingSet.getLabels();
 
-                    if (currentAccuracy > bestAccuracy) {
-                        bestAccuracy = currentAccuracy;
+                        // Measure performance metrics using holdout validation testing data set and add to the running total
+                        int[] prediction = model.predict(validationTestingData);
+                        double currentAccuracy = Accuracy.of(validationTestingLabels, prediction);
+                        runningTotalAccuracy += currentAccuracy;
+                    }
+                    
+                    // Measure mean accuracy of cross-validation for current options and update best parameters if performance gain detected
+                    double meanCurrentAccuracy = runningTotalAccuracy / DEFAULT_NUM_FOLDS;
+                    if (meanCurrentAccuracy > bestAccuracy) {
+                        bestAccuracy = meanCurrentAccuracy;
                         bestLambda = lambda;
                         bestTolerance = tolerance;
                         bestMaxIter = maxIter;
