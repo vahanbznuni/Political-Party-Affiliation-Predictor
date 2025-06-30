@@ -97,7 +97,7 @@ public class DataStore {
 
         for (int i=0; i<getSize(); i++) {
             for (int j=0; j<NUMBER_OF_FEATURES; j++) {
-                dataString.append(getData().get(i).get(j))
+                dataString.append(getData().get(i).get(j).intValue())
                 .append(",");
             }
             dataString.append(getLabels().get(i)).append(System.lineSeparator());
