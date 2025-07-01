@@ -36,15 +36,23 @@ public class Controller {
         // Conduct survey(s) until user exists
         boolean loop = true;
         while (loop) {
-            // Conduct main parto of the survey and output the prediction
-            double[] mainResponces = cli.conductSurveyMain();
-            PartyAffiliation prediction = DataStore.intToPartyAffiliation(predictor.predict(mainResponces));
+            // Conduct main part of the survey and output the prediction
+
+            // Get features vector via user input and normalize
+            double[] mainResponcesRaw = cli.conductSurveyMain();
+            double[] mainResponcesEncoded = DataStore.encodeFeaturesVector(mainResponcesRaw);
+            double[][] scalingBoxRaw = new double[][]{mainResponcesEncoded};
+            double[][] scalingBoxScaled = Scaler.toNormalizedMatrix(scalingBoxRaw, predictor.getTrainingDataScalingParams());
+            double[] mainResponcesEncodedScaled = scalingBoxScaled[0];
+
+            // Get and print prediction
+            PartyAffiliation prediction = DataStore.intToPartyAffiliation(predictor.predict(mainResponcesEncodedScaled));
             System.out.print("\nThe system predicts your party affiliation as follows: ");
             System.out.println(prediction);
             
             // Gather the final responce, save data, and retrain model on update data
             int finalResponce = cli.conductSurveyFinal();
-            dataStore.addData(mainResponces, finalResponce);
+            dataStore.addData(mainResponcesEncoded, finalResponce); // Save unscaled but encoded
             predictor.retrainModel();
             printStats(predictor.getModel());
 
@@ -60,7 +68,6 @@ public class Controller {
                     throw new RuntimeException("Unexpected Input received");
             }
         }
-
 
 
         try {

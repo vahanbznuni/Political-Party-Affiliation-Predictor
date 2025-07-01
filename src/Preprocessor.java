@@ -3,7 +3,7 @@
  */
 public class Preprocessor {
     
-    public static DataUnits.DataBlock getProcessed(DataUnits.DataBlock rawDataBlock) {
+    public static DataUnits.ProcessedDataPacket getProcessed(DataUnits.DataBlock rawDataBlock) {
         // Extract raw features data
         double[][] trainDataRaw = rawDataBlock.getTrainSet().getData();
         double[][] testDataRaw = rawDataBlock.getTestSet().getData();
@@ -25,7 +25,10 @@ public class Preprocessor {
         DataUnits.DataSet transformedTestSet = new DataUnits.DataSet(
             testScaledWeighted, rawDataBlock.getTestSet().getLabels());
 
-        return new DataUnits.DataBlock(transformedTrainSet, transformedTestSet);
+        
+        DataUnits.DataBlock processedDataBlock = new DataUnits.DataBlock(transformedTrainSet, transformedTestSet);
+
+        return new DataUnits.ProcessedDataPacket(processedDataBlock, params);
     }
     
 }

@@ -3,6 +3,7 @@ import smile.classification.LogisticRegression;
 public class Predictor {
     private DataStore dataStorage;
     private ModelTrainer.TrainedModel trainedModel;
+    private Scaler.NormalDistParams trainingDataScalingParams;
 
     private static enum TrainingMode {
         DEFAULT,
@@ -19,7 +20,10 @@ public class Predictor {
         int[] trainingLabels = DataStore.toIntVector(dataStorage.getLabels());
         switch(mode) {
             case DEFAULT:
-                this.trainedModel = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS).getTrainedModel(); // <--Refactor later
+                // Consider redesigning
+                ModelTrainer trainer = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS);
+                this.trainedModel = trainer.getTrainedModel();
+                this.trainingDataScalingParams = trainer.getMasterDataScaledParams();
                 break;
             case REUSE_OPTIONS:
                 if (trainedModel == null) {
@@ -44,6 +48,10 @@ public class Predictor {
 
     public ModelTrainer.TrainedModel getModel() {
         return trainedModel;
+    }
+
+    public Scaler.NormalDistParams getTrainingDataScalingParams() {
+        return trainingDataScalingParams;
     }
     
 }

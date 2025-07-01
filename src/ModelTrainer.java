@@ -9,6 +9,7 @@ import smile.validation.metric.FScore;
 public class ModelTrainer {
     private static final int DEFAULT_NUM_FOLDS = 5;
     private final DataUnits.DataBlock masterDataBlock;
+    private Scaler.NormalDistParams masterDataScaledParams;
     // Search space for hyper-parameters
     private static final double[] DEFAULT_LAMBDA_RANGE = new double[]{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1};
     private static final double[] DEFAULT_TOLERANCE_RANGE = new double[]{1e-4, 1e-5, 1e-6};
@@ -22,7 +23,9 @@ public class ModelTrainer {
     public ModelTrainer(double[][] masterData, int[] masterLabels, TrainerOptions options) {
         DataUnits.DataBlock rawDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0);
         if (options == TrainerOptions.PREPROCESS) {
-            this.masterDataBlock = Preprocessor.getProcessed(new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0));
+            DataUnits.ProcessedDataPacket dataPacket = Preprocessor.getProcessed(new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0));
+            this.masterDataBlock = dataPacket.getProcessedDataBlock();
+            this.masterDataScaledParams = dataPacket.getNormalDistParams();
         } else if (options == TrainerOptions.DO_NOT_PREPROCESS) {
             this.masterDataBlock = rawDataBlock;
         } else {
@@ -38,6 +41,10 @@ public class ModelTrainer {
      */
     public ModelTrainer(double[][] masterData, int[] masterLabels) {
         this(masterData, masterLabels, TrainerOptions.DO_NOT_PREPROCESS);      
+    }
+
+    public Scaler.NormalDistParams getMasterDataScaledParams() {
+        return masterDataScaledParams;
     }
 
 

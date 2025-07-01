@@ -147,8 +147,7 @@ public class DataStore {
             throw new IllegalArgumentException("Unexpected number of features");
         }
         List<Double> newEntry = new ArrayList<Double>();
-        double[] encodedVector = encodeFeaturesVector(vector);
-        for (double number : encodedVector) {
+        for (double number : vector) {
             newEntry.add((Double) number);
         }
         this.data.add(newEntry);

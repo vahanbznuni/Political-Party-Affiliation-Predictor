@@ -39,5 +39,25 @@ public class DataUnits {
             return this.labels;
         }
     }
+
+
+    static class ProcessedDataPacket {
+        private final DataBlock processedDataBlock;
+        private final Scaler.NormalDistParams normalDistParams;
+
+        public ProcessedDataPacket(DataBlock processeBlock, Scaler.NormalDistParams normalDistParams) {
+            this.processedDataBlock = processeBlock;
+            this.normalDistParams = normalDistParams;
+        }
+
+        public DataBlock getProcessedDataBlock() {
+            return processedDataBlock;
+        }
+
+        public Scaler.NormalDistParams getNormalDistParams() {
+            return normalDistParams;
+        }
+
+    }
     
 }
