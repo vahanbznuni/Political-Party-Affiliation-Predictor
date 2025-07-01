@@ -203,9 +203,9 @@ public class CLI {
                     System.out.println();
                     userInput = -1;
                     continue;
-                } //finally {
-                //     flushScanner();
-                // }
+                } finally {
+                     flushScanner();
+                }
             }
 
             responces[i] = userInput;
