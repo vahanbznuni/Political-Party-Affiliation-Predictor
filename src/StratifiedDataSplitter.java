@@ -19,7 +19,7 @@ public class StratifiedDataSplitter {
     }
 
     
-    public DataBlock getDataBlock(int FoldIndex) {
+    public DataUnits.DataBlock getDataBlock(int FoldIndex) {
         if (FoldIndex >= numberOfFolds || FoldIndex < 0) {
             throw new IllegalArgumentException("FoldIndex needs to be between 0 and " + numberOfFolds);
         }
@@ -32,53 +32,17 @@ public class StratifiedDataSplitter {
         // get Train Set
         double[][] trainingData = MathEx.slice(masterData, trainingIndices);
         int[] trainingLabels = MathEx.slice(masterLabels, trainingIndices);
-        DataSet trainSet = new DataSet(trainingData, trainingLabels);
+        DataUnits.DataSet trainSet = new DataUnits.DataSet(trainingData, trainingLabels);
         
         // get Test Set
         double[][] testData = MathEx.slice(masterData, testingIndices);
         int[] testLabels = MathEx.slice(masterLabels, testingIndices);
-        DataSet testSet = new DataSet(testData, testLabels);
+        DataUnits.DataSet testSet = new DataUnits.DataSet(testData, testLabels);
         
-        return new DataBlock(trainSet, testSet);        
+        return new DataUnits.DataBlock(trainSet, testSet);        
     }
 
 
-    class DataBlock {
-        private final DataSet trainSet;
-        private final DataSet testSet;
-
-        public DataBlock(DataSet trainSet, DataSet testSet) {
-            this.trainSet = trainSet;
-            this.testSet = testSet;
-        }
-
-        public DataSet getTrainSet() {
-            return trainSet;
-        }
-
-        public DataSet getTestSet() {
-            return testSet;
-        }
-    }
-
-
-    class DataSet {
-        private double[][] data;
-        private int[] labels;
-
-        public DataSet(double[][] data, int[] labels) {
-            this.data = data;
-            this.labels = labels;
-        }    
-
-        public double[][] getData() {
-            return this.data;
-        }
-
-        public int[] getLabels() {
-            return this.labels;
-        }
-    }
 
     
 }

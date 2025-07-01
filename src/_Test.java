@@ -20,17 +20,36 @@ public class _Test {
 
         double[][] trainingData = DataStore.toDoubleMatrix(testDataStore.getData());
         int[] trainingLabels = DataStore.toIntVector(testDataStore.getLabels());
-        ModelTrainer.TrainedModel trainedModel = new ModelTrainer(trainingData, trainingLabels).getTrainedModel();
+        
+        // Train a model without scaling/weighting data
+        ModelTrainer.TrainedModel trainedModel1 = new ModelTrainer(
+            trainingData, trainingLabels).getTrainedModel();
+
+        // Train a model with scaling/weighting data
+        ModelTrainer.TrainedModel trainedModel2 = new ModelTrainer(
+            trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS).getTrainedModel();
 
         System.out.println("\n");
+        System.out.println("-----------------------");
+        System.out.println("Model 1 Stats");
+        getStats(trainedModel1);
         System.out.println("\n");
-        System.out.println(trainedModel.getModelMetrics().getMeasuredAccuracy());
-        System.out.println(trainedModel.getModelMetrics().getMeasuredRecall());
-        System.out.println(trainedModel.getModelMetrics().getPrecision());
-        System.out.println(trainedModel.getModelMetrics().getF1Score());
+        System.out.println("-----------------------");
+        System.out.println("Model 2 Stats");
+        getStats(trainedModel2);
+
 
         System.out.println("\n");
         System.out.println("Basic Pass");
+        System.out.println("\n");
+    }
+
+    public static void getStats(ModelTrainer.TrainedModel model) {
+        System.out.println("\n");
+        System.out.println(model.getModelMetrics().getMeasuredAccuracy());
+        System.out.println(model.getModelMetrics().getMeasuredRecall());
+        System.out.println(model.getModelMetrics().getPrecision());
+        System.out.println(model.getModelMetrics().getF1Score());
         System.out.println("\n");
     }
     
