@@ -91,13 +91,13 @@ public class DataStore {
         StringBuilder dataString = new StringBuilder();
 
         // Write header row
-        dataString.append("ticket_split,party_fit,more_parties,inflation,deficit")
+        dataString.append("ticket_split,party_fit,more_parties,inflation,deficit,")
         .append("immigration,guns,morals,climate,terrorism,economy,crime,label")
         .append(System.lineSeparator());
 
         for (int i=0; i<getSize(); i++) {
             for (int j=0; j<NUMBER_OF_FEATURES; j++) {
-                dataString.append(getData().get(i).get(j))
+                dataString.append(getData().get(i).get(j).intValue())
                 .append(",");
             }
             dataString.append(getLabels().get(i)).append(System.lineSeparator());
@@ -147,7 +147,8 @@ public class DataStore {
             throw new IllegalArgumentException("Unexpected number of features");
         }
         List<Double> newEntry = new ArrayList<Double>();
-        for (double number : vector) {
+        double[] encodedVector = encodeFeaturesVector(vector);
+        for (double number : encodedVector) {
             newEntry.add((Double) number);
         }
         this.data.add(newEntry);
@@ -228,6 +229,36 @@ public class DataStore {
             default:
                 throw new IllegalArgumentException("Unexpected input received");
         }
+    }
+
+    public static int getFeatureRange(int featureNumber) {
+        switch(featureNumber) {
+            case 0, 1, 12:
+                return 4;
+            case 2:
+                return 2;
+            case 3, 4, 5, 6, 7, 8, 9, 10, 11:
+                return 3;
+            default:
+                throw new IllegalArgumentException("Unexpected input received");
+        }
+    }
+
+    public static double[] encodeFeaturesVector(double[] rawVector) {
+        double[] encodedVector = new double[rawVector.length];
+        for (int i=0; i<rawVector.length; i++) {
+            EncodingDirection encodingDirection = getEncodingDirection(i);
+            double value = rawVector[i];
+            switch(encodingDirection) {
+                case EncodingDirection.FORWARD:
+                    encodedVector[i] = value - 1;
+                    break;
+                case EncodingDirection.REVERSE:
+                    encodedVector[i] = getFeatureRange(i) - value;
+            }
+        }
+
+        return encodedVector;
     }
 
 }
