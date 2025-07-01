@@ -2,3 +2,4 @@ out/*.class
 design/
 .DS_Store
 data_1000_realistic_bak.csv
+_TEMP.txt
