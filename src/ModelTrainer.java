@@ -8,16 +8,36 @@ import smile.validation.metric.FScore;
 
 public class ModelTrainer {
     private static final int DEFAULT_NUM_FOLDS = 5;
-    private final StratifiedDataSplitter.DataBlock masterDataBlock;
+    private final DataUnits.DataBlock masterDataBlock;
     // Search space for hyper-parameters
     private static final double[] DEFAULT_LAMBDA_RANGE = new double[]{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1};
     private static final double[] DEFAULT_TOLERANCE_RANGE = new double[]{1e-4, 1e-5, 1e-6};
     private static final int[] DEFAULT_MAX_ITER_RANGE = new int[]{100, 300, 900};
 
 
+    /*
+     * Apply data splitting, normalization scaling, weighting, and packaging into 
+     * test and train sets, and save the packaged data block as an instanced variable
+     */
+    public ModelTrainer(double[][] masterData, int[] masterLabels, TrainerOptions options) {
+        DataUnits.DataBlock rawDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0);
+        if (options == TrainerOptions.PREPROCESS) {
+            this.masterDataBlock = Preprocessor.getProcessed(new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0));
+        } else if (options == TrainerOptions.DO_NOT_PREPROCESS) {
+            this.masterDataBlock = rawDataBlock;
+        } else {
+            // This shouldn't happen
+            System.out.println("\n\n***WARNING: UNEXPECTED CODE BLOCK REACHED***\n\n");
+            this.masterDataBlock = rawDataBlock;
+        }
+    }
+
+    /*
+     * Apply data splitting, packaging into test and train sets, and save the packaged 
+     * data block as an instanced variable. This flow does not apply scalling and weighting
+     */
     public ModelTrainer(double[][] masterData, int[] masterLabels) {
-        // Split master data/labels into training/validation (80%) and hold-out test (20%) data sets       
-        this.masterDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0);
+        this(masterData, masterLabels, TrainerOptions.DO_NOT_PREPROCESS);      
     }
 
 
@@ -87,13 +107,21 @@ public class ModelTrainer {
 
     }
 
+    /*
+     * Enum for controlling preprocessing choice
+     */
+    public static enum TrainerOptions {
+        PREPROCESS,
+        DO_NOT_PREPROCESS
+    }
+
 
     /*
      * Get a packaged model with metrics, trained using provided options
      */
     public TrainedModel getTrainedModel(LogisticRegression.Options options) { 
         // Get master training data set (from stratified data split)
-        StratifiedDataSplitter.DataSet masterTrainingSet = masterDataBlock.getTrainSet();
+        DataUnits.DataSet masterTrainingSet = masterDataBlock.getTrainSet();
         double[][] masterTrainingData = masterTrainingSet.getData();
         int[] masterTrainingLabels = masterTrainingSet.getLabels();
 
@@ -101,7 +129,7 @@ public class ModelTrainer {
         LogisticRegression.Multinomial finalModel = LogisticRegression.multinomial(masterTrainingData, masterTrainingLabels, options);
         
         // Get master testing data set (from stratified data split)
-        StratifiedDataSplitter.DataSet masterTestingSet = masterDataBlock.getTestSet();
+        DataUnits.DataSet masterTestingSet = masterDataBlock.getTestSet();
         double[][] masterTestingData = masterTestingSet.getData();
         int[] masterTestingLabels = masterTestingSet.getLabels();  
 
@@ -135,7 +163,7 @@ public class ModelTrainer {
      */
     public LogisticRegression.Options getTunedOptions() {
         // Get master training data set (from stratified data split)
-        StratifiedDataSplitter.DataSet masterTrainingSet = masterDataBlock.getTrainSet();
+        DataUnits.DataSet masterTrainingSet = masterDataBlock.getTrainSet();
         double[][] masterTrainingData = masterTrainingSet.getData();
         int[] masterTrainingLabels = masterTrainingSet.getLabels();
 
@@ -155,10 +183,10 @@ public class ModelTrainer {
                     // Running total Accuracy measure for measuring mean across Cross-Validaiton folds
                     double runningTotalAccuracy = 0;
                     for (int i=0; i<DEFAULT_NUM_FOLDS; i++) {
-                        StratifiedDataSplitter.DataBlock validationDataBlock = validationSplitter.getDataBlock(i);
+                        DataUnits.DataBlock validationDataBlock = validationSplitter.getDataBlock(i);
 
                         // Get validation training data set (from 2nd stratified data split)
-                        StratifiedDataSplitter.DataSet validationTrainingSet = validationDataBlock.getTrainSet();
+                        DataUnits.DataSet validationTrainingSet = validationDataBlock.getTrainSet();
                         double[][] validationTrainingData = validationTrainingSet.getData();
                         int[] validationTrainingLabels = validationTrainingSet.getLabels();
         
@@ -167,7 +195,7 @@ public class ModelTrainer {
                         LogisticRegression.Multinomial model = LogisticRegression.multinomial(validationTrainingData, validationTrainingLabels, options);
                         
                         // Get validation testing data set (from 2nd stratified data split)
-                        StratifiedDataSplitter.DataSet validationTestingSet = validationDataBlock.getTestSet();
+                        DataUnits.DataSet validationTestingSet = validationDataBlock.getTestSet();
                         double[][] validationTestingData = validationTestingSet.getData();
                         int[] validationTestingLabels = validationTestingSet.getLabels();
 

@@ -64,9 +64,9 @@ public class Controller {
         double scale = Math.pow(10, places);
         ModelTrainer.ModelMetrics modelMetrics = predictor.getModel().getModelMetrics();
         String accuracy = Math.round(modelMetrics.getMeasuredAccuracy()*scale) + "%";
-        String recall = Math.round(modelMetrics.getMeasuredAccuracy()*scale) + "%";
-        String precision = Math.round(modelMetrics.getMeasuredAccuracy()*scale) + "%";
-        String f1Score = Math.round(modelMetrics.getMeasuredAccuracy()*scale) + "%"; 
+        String recall = Math.round(modelMetrics.getMeasuredRecall()*scale) + "%";
+        String precision = Math.round(modelMetrics.getPrecision()*scale) + "%";
+        String f1Score = Math.round(modelMetrics.getF1Score()*scale) + "%"; 
 
         System.out.println("\n\n");
         System.out.println("The following are the current (updated) model performance metrics:");
