@@ -46,6 +46,7 @@ public class Controller {
             int finalResponce = cli.conductSurveyFinal();
             dataStore.addData(mainResponces, finalResponce);
             predictor.retrainModel();
+            printStats(predictor.getModel());
 
             // Check if the user wants to conduct another survey
             int repeat = cli.checkRepeat();
@@ -60,20 +61,7 @@ public class Controller {
             }
         }
 
-        int places = 2; // Rounding precision
-        double scale = Math.pow(10, places);
-        ModelTrainer.ModelMetrics modelMetrics = predictor.getModel().getModelMetrics();
-        String accuracy = Math.round(modelMetrics.getMeasuredAccuracy()*scale) + "%";
-        String recall = Math.round(modelMetrics.getMeasuredRecall()*scale) + "%";
-        String precision = Math.round(modelMetrics.getPrecision()*scale) + "%";
-        String f1Score = Math.round(modelMetrics.getF1Score()*scale) + "%"; 
 
-        System.out.println("\n\n");
-        System.out.println("The following are the current (updated) model performance metrics:");
-        System.out.println("Accuracy: " + accuracy);
-        System.out.println("Recall: " + recall);
-        System.out.println("Precision: " + precision);
-        System.out.println("F1 Score: " + f1Score);
 
         try {
             dataStore.saveData();
@@ -85,6 +73,24 @@ public class Controller {
 
         System.out.println("Goodbye!");
         System.out.println("\n\n\n");
+    }
+
+    public static void printStats(ModelTrainer.TrainedModel model) {
+        int places = 2; // Rounding precision
+        double scale = Math.pow(10, places);
+        ModelTrainer.ModelMetrics modelMetrics = model.getModelMetrics();
+        String accuracy = Math.round(modelMetrics.getMeasuredAccuracy()*scale) + "%";
+        String recall = Math.round(modelMetrics.getMeasuredRecall()*scale) + "%";
+        String precision = Math.round(modelMetrics.getPrecision()*scale) + "%";
+        String f1Score = Math.round(modelMetrics.getF1Score()*scale) + "%"; 
+
+        System.out.println("\n");
+        System.out.println("The following are the current (updated) model performance metrics:");
+        System.out.println("Accuracy: " + accuracy);
+        System.out.println("Recall: " + recall);
+        System.out.println("Precision: " + precision);
+        System.out.println("F1 Score: " + f1Score);
+        System.out.println("\n");
     }
 
 

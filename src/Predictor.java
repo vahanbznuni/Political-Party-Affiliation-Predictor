@@ -19,7 +19,7 @@ public class Predictor {
         int[] trainingLabels = DataStore.toIntVector(dataStorage.getLabels());
         switch(mode) {
             case DEFAULT:
-                this.trainedModel = new ModelTrainer(trainingData, trainingLabels).getTrainedModel();
+                this.trainedModel = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS).getTrainedModel(); // <--Refactor later
                 break;
             case REUSE_OPTIONS:
                 if (trainedModel == null) {

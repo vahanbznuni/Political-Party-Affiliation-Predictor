@@ -9,7 +9,7 @@ public class Preprocessor {
         double[][] testDataRaw = rawDataBlock.getTestSet().getData();
 
         // Fit normalizer
-        Scaler.NormalDistParams params = Scaler.computeNormalDistParams(testDataRaw);
+        Scaler.NormalDistParams params = Scaler.computeNormalDistParams(trainDataRaw);
 
         // Scale both train and test raw data using parameters learned from train
         double[][] trainScaled = Scaler.toNormalizedMatrix(trainDataRaw, params);
