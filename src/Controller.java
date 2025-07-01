@@ -28,11 +28,6 @@ public class Controller {
         // Initialize the command-line interface
         CLI cli = new CLI();
 
-        // Print introductory message(s)
-        System.out.println("\n\n");
-        System.out.println("Welcome to the survey.");
-        System.out.println("\n\n");
-
         // Conduct survey(s) until user exists
         boolean loop = true;
         while (loop) {

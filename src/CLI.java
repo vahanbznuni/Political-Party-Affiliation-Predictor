@@ -115,12 +115,15 @@ public class CLI {
      */
     public double[] conductSurveyMain() {
         String systemMessageMain = "For the purpose of this survey, if your response would have been different in the year 2024 than it is now due to a change in policy or events other than any change in your personal views, please provide the response as it would have been in 2024.";
-        String systemMessage2 = "Note: if the screen seems frozen, press ENTER";
+        String systemMessage2 = "**Note: if the screen ever seems frozen, press ENTER again**";
         String horizontalBar = "=========================";
 
         System.out.println("\n\n");
+        System.out.println(horizontalBar);
+        System.out.println("Welcome to the survey.");
+        System.out.println("\n");
         System.out.println(systemMessage2);
-        System.out.println("\n\n");
+        System.out.println("\n");
         System.out.println(horizontalBar);
         System.out.println(systemMessageMain);
         System.out.println("\n");
@@ -200,9 +203,9 @@ public class CLI {
                     System.out.println();
                     userInput = -1;
                     continue;
-                } finally {
-                    flushScanner();
-                }
+                } //finally {
+                //     flushScanner();
+                // }
             }
 
             responces[i] = userInput;
