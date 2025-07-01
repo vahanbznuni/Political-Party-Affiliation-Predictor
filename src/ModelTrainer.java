@@ -23,7 +23,7 @@ public class ModelTrainer {
     public ModelTrainer(double[][] masterData, int[] masterLabels, TrainerOptions options) {
         DataUnits.DataBlock rawDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0);
         if (options == TrainerOptions.PREPROCESS) {
-            DataUnits.ProcessedDataPacket dataPacket = Preprocessor.getProcessed(new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0));
+            DataUnits.ProcessedDataPacket dataPacket = Preprocessor.getProcessed(rawDataBlock);
             this.masterDataBlock = dataPacket.getProcessedDataBlock();
             this.masterDataScaledParams = dataPacket.getNormalDistParams();
         } else if (options == TrainerOptions.DO_NOT_PREPROCESS) {

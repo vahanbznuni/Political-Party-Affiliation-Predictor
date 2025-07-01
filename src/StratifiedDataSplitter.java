@@ -12,6 +12,7 @@ public class StratifiedDataSplitter {
     private Bag[] bags;
 
     public StratifiedDataSplitter(double[][] data, int[] labels, int numberOfFolds) {
+        MathEx.setSeed(42);
         this.masterData = data;
         this.masterLabels = labels;
         this.numberOfFolds = numberOfFolds;

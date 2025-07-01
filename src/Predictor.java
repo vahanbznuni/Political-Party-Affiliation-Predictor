@@ -18,21 +18,25 @@ public class Predictor {
     private void setModel(TrainingMode mode) {
         double[][] trainingData = DataStore.toDoubleMatrix(dataStorage.getData());
         int[] trainingLabels = DataStore.toIntVector(dataStorage.getLabels());
+        ModelTrainer trainer = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS);
+        this.trainingDataScalingParams = trainer.getMasterDataScaledParams();
         switch(mode) {
             case DEFAULT:
                 // Consider redesigning
-                ModelTrainer trainer = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS);
                 this.trainedModel = trainer.getTrainedModel();
-                this.trainingDataScalingParams = trainer.getMasterDataScaledParams();
                 break;
             case REUSE_OPTIONS:
                 if (trainedModel == null) {
                     throw new IllegalArgumentException("Cannot reuse options when trainedModel is null");
                 }
                 LogisticRegression.Options currentOptions = this.trainedModel.getOptions();
-                this.trainedModel = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS).getTrainedModel(currentOptions); // <--Refactor later
-        }
+                this.trainedModel = trainer.getTrainedModel(currentOptions);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown Mode: " + mode);    
+        }   
     }
+
 
     public int predict(double[] vector) {
         return trainedModel.getModel().predict(vector);

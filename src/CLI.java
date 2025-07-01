@@ -154,7 +154,7 @@ public class CLI {
         Question[] subQuestions = new Question[]{surveyAgain};
         double[] responcesArr = executeCoreQuestionnaire(subQuestions);
 
-        return (int)responcesArr[0];
+        return (int) responcesArr[0];
     }
 
     /*

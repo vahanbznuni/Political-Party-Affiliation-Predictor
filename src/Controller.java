@@ -39,20 +39,21 @@ public class Controller {
             // Conduct main part of the survey and output the prediction
 
             // Get features vector via user input and normalize
-            double[] mainResponcesRaw = cli.conductSurveyMain();
-            double[] mainResponcesEncoded = DataStore.encodeFeaturesVector(mainResponcesRaw);
-            double[][] scalingBoxRaw = new double[][]{mainResponcesEncoded};
-            double[][] scalingBoxScaled = Scaler.toNormalizedMatrix(scalingBoxRaw, predictor.getTrainingDataScalingParams());
-            double[] mainResponcesEncodedScaled = scalingBoxScaled[0];
+            double[] vectorRaw = cli.conductSurveyMain();
+            double[] vectorEncoded = DataStore.encodeFeaturesVector(vectorRaw);
+            double[][] boxedVectorEncoded = new double[][]{vectorEncoded};
+            double[][] boxedVectorEncodedScaled = Scaler.toNormalizedMatrix(boxedVectorEncoded, predictor.getTrainingDataScalingParams());
+            double[][] boxedVectorEncodedScaledWeighted = Weighter.toWeightedMatrix(boxedVectorEncodedScaled);
+            double[] vectorEncodedScaledWeighted = boxedVectorEncodedScaledWeighted[0];
 
             // Get and print prediction
-            PartyAffiliation prediction = DataStore.intToPartyAffiliation(predictor.predict(mainResponcesEncodedScaled));
+            PartyAffiliation prediction = DataStore.intToPartyAffiliation(predictor.predict(vectorEncodedScaledWeighted));
             System.out.print("\nThe system predicts your party affiliation as follows: ");
             System.out.println(prediction);
             
             // Gather the final responce, save data, and retrain model on update data
-            int finalResponce = cli.conductSurveyFinal();
-            dataStore.addData(mainResponcesEncoded, finalResponce); // Save unscaled but encoded
+            int finalResponce = cli.conductSurveyFinal()-1;
+            dataStore.addData(vectorEncoded, finalResponce); // Save unscaled but encoded
             predictor.retrainModel();
             printStats(predictor.getModel());
 

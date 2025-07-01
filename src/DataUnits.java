@@ -45,8 +45,8 @@ public class DataUnits {
         private final DataBlock processedDataBlock;
         private final Scaler.NormalDistParams normalDistParams;
 
-        public ProcessedDataPacket(DataBlock processeBlock, Scaler.NormalDistParams normalDistParams) {
-            this.processedDataBlock = processeBlock;
+        public ProcessedDataPacket(DataBlock processedBlock, Scaler.NormalDistParams normalDistParams) {
+            this.processedDataBlock = processedBlock;
             this.normalDistParams = normalDistParams;
         }
 
