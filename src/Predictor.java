@@ -26,7 +26,7 @@ public class Predictor {
                     throw new IllegalArgumentException("Cannot reuse options when trainedModel is null");
                 }
                 LogisticRegression.Options currentOptions = this.trainedModel.getOptions();
-                this.trainedModel = new ModelTrainer(trainingData, trainingLabels).getTrainedModel(currentOptions);
+                this.trainedModel = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS).getTrainedModel(currentOptions); // <--Refactor later
         }
     }
 
