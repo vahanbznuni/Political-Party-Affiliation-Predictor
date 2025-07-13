@@ -11,19 +11,25 @@ project-root/
 │   └── data.csv
 ├── lib/
 ├── out/
+│   └── *.class files (compiled Java classes)
 ├── src/
 │   ├── _TEST.java
+│   ├── _TestMatrixMath.java
 │   ├── CLI.java
 │   ├── Controller.java
 │   ├── CorruptDataException.java
 │   ├── DataStore.java
 │   ├── DataUnits.java
+│   ├── LogisticRegressionMultinomial.java
 │   ├── Main.java
+│   ├── MatrixMath.java
+│   ├── MetricsMultinomial.java
 │   ├── ModelTrainer.java
 │   ├── PartyAffiliation.java
 │   ├── Predictor.java
 │   ├── Preprocessor.java
 │   ├── Scaler.java
+│   ├── Softmax.java
 │   ├── StratifiedDataSplitter.java
 │   └── Weighter.java
 └── README.md
@@ -62,5 +68,3 @@ project-root/
 *Note: Current program does not include any dependencies, so there are actually
 no JAR files in lib/. However, the instructions have been kept as is to ensure that
 past and previous versions of the program run consistently.
-
-For more details on using Smile, check out the [Smile Quick Start Guide](https://haifengl.github.io/quickstart.html).
