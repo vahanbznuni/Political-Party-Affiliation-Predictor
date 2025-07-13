@@ -1,11 +1,3 @@
-// import smile.classification.LogisticRegression;
-import smile.validation.metric.Accuracy;
-import smile.validation.metric.Averaging;
-import smile.validation.metric.Precision;
-import smile.validation.metric.Recall;
-import smile.validation.metric.FScore;
-
-
 public class ModelTrainer {
     private static final int DEFAULT_NUM_FOLDS = 5;
     private final DataUnits.DataBlock masterDataBlock;
@@ -14,26 +6,41 @@ public class ModelTrainer {
     private static final double[] DEFAULT_LAMBDA_RANGE = new double[]{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1};
     private static final double[] DEFAULT_TOLERANCE_RANGE = new double[]{1e-4, 1e-5, 1e-6};
     private static final int[] DEFAULT_MAX_ITER_RANGE = new int[]{100, 300, 900};
-    private static final int _TEST_NUM_CLASSES = 4;
+    private static final int _TEST_NUM_CLASSES = 4; // <-- This should be refactored to be a passable param.
 
 
     /*
      * Apply data splitting, normalization scaling, weighting, and packaging into 
      * test and train sets, and save the packaged data block as an instanced variable
      */
-    public ModelTrainer(double[][] masterData, int[] masterLabels, TrainerOptions options) {
-        DataUnits.DataBlock rawDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0);
-        if (options == TrainerOptions.PREPROCESS) {
-            DataUnits.ProcessedDataPacket dataPacket = Preprocessor.getProcessed(rawDataBlock);
-            this.masterDataBlock = dataPacket.getProcessedDataBlock();
+    public ModelTrainer(double[][] masterData, int[] masterLabels, TrainerOptions option) {
+        DataUnits.DataBlock rawDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0); 
+        DataUnits.DataBlock finalDataBlock = rawDataBlock;
+        
+        // Applying processing as selected
+        if (option != TrainerOptions.DO_NOT_PREPROCESS) {
+            DataUnits.ProcessedDataPacket dataPacket = null;
+            switch(option) {
+                case TrainerOptions.SCALE:
+                    dataPacket = Preprocessor.getProcessed(rawDataBlock, true, false);
+                    break;
+                case TrainerOptions.WEIGHT:
+                    dataPacket = Preprocessor.getProcessed(rawDataBlock, false, true);
+                    break;
+                case TrainerOptions.SCALE_AND_WEIGHT:
+                    dataPacket = Preprocessor.getProcessed(rawDataBlock, true, true);
+                    break;
+                default:
+                    // This shouldn't happen currently
+                    System.out.println("\n\n***WARNING: UNEXPECTED CODE BLOCK REACHED***\n\n");
+                    break;
+            }
+            finalDataBlock = dataPacket.getProcessedDataBlock();
             this.masterDataScaledParams = dataPacket.getNormalDistParams();
-        } else if (options == TrainerOptions.DO_NOT_PREPROCESS) {
-            this.masterDataBlock = rawDataBlock;
-        } else {
-            // This shouldn't happen
-            System.out.println("\n\n***WARNING: UNEXPECTED CODE BLOCK REACHED***\n\n");
-            this.masterDataBlock = rawDataBlock;
         }
+
+        // Save final processed (or unprocessed) block
+        this.masterDataBlock = finalDataBlock;
     }
 
     /*
@@ -119,7 +126,9 @@ public class ModelTrainer {
      * Enum for controlling preprocessing choice
      */
     public static enum TrainerOptions {
-        PREPROCESS,
+        SCALE,
+        WEIGHT,
+        SCALE_AND_WEIGHT,
         DO_NOT_PREPROCESS
     }
 
@@ -144,10 +153,11 @@ public class ModelTrainer {
         // Measure performance metrics using holdout master test data set
         // package model and metrics into a TrainedModel wrapper, and return it
         int[] finalPrediction = finalModel.predict(masterTestingData);
-        double finalAccuracy = Accuracy.of(masterTestingLabels, finalPrediction);
-        double finalPrecision = Precision.of(masterTestingLabels, finalPrediction, Averaging.Weighted);
-        double finalRecall = Recall.of(masterTestingLabels, finalPrediction, Averaging.Weighted);
-        double finalF1Score = FScore.of(masterTestingLabels, finalPrediction, 1, Averaging.Weighted);
+        MetricsMultinomial metrics = new MetricsMultinomial(masterTestingLabels, finalPrediction, _TEST_NUM_CLASSES);
+        double finalAccuracy = metrics.getAccuracy();
+        double finalPrecision = metrics.getPrecision(MetricsMultinomial.Averaging.WEIGHTED);
+        double finalRecall = metrics.getRecall(MetricsMultinomial.Averaging.WEIGHTED);
+        double finalF1Score = metrics.getF1Score(MetricsMultinomial.Averaging.WEIGHTED);
         ModelMetrics modelMetrics = new ModelMetrics(finalAccuracy, finalRecall, finalPrecision, finalF1Score);
 
         return new ModelTrainer.TrainedModel(finalModel, options, modelMetrics);
@@ -209,7 +219,8 @@ public class ModelTrainer {
 
                         // Measure performance metrics using holdout validation testing data set and add to the running total
                         int[] prediction = model.predict(validationTestingData);
-                        double currentAccuracy = Accuracy.of(validationTestingLabels, prediction);
+                        MetricsMultinomial metrics = new MetricsMultinomial(validationTestingLabels, prediction, _TEST_NUM_CLASSES);
+                        double currentAccuracy = metrics.getAccuracy();
                         runningTotalAccuracy += currentAccuracy;
                     }
                     

@@ -18,7 +18,7 @@ public class Predictor {
     private void setModel(TrainingMode mode) {
         double[][] trainingData = DataStore.toDoubleMatrix(dataStorage.getData());
         int[] trainingLabels = DataStore.toIntVector(dataStorage.getLabels());
-        ModelTrainer trainer = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS);
+        ModelTrainer trainer = new ModelTrainer(trainingData, trainingLabels, ModelTrainer.TrainerOptions.SCALE);
         this.trainingDataScalingParams = trainer.getMasterDataScaledParams();
         switch(mode) {
             case DEFAULT:

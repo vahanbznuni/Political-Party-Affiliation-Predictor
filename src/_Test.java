@@ -24,11 +24,14 @@ public class _Test {
         
         // Train a model without scaling/weighting data
         ModelTrainer.TrainedModel trainedModel1 = new ModelTrainer(
+            // Automatically passes DO_NOT_PREPROCESS option
             trainingData, trainingLabels).getTrainedModel();
 
-        // Train a model with scaling/weighting data
+        // Train a model with scaling data
         ModelTrainer.TrainedModel trainedModel2 = new ModelTrainer(
-            trainingData, trainingLabels, ModelTrainer.TrainerOptions.PREPROCESS).getTrainedModel();
+            trainingData, trainingLabels, ModelTrainer.TrainerOptions.SCALE).getTrainedModel();
+
+        // Note, similar options can also be WEIGHT (only) or SCALE_AND_WEIGHT
 
         System.out.println("\n");
         System.out.println("-----------------------");

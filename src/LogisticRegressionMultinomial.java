@@ -7,7 +7,7 @@ class LogisticRegressionMultinomial {
         private static final int DEFAULT_MAX_ITER = 300;
         private static final double LEARNING_RATE = 0.01;
         private double[][] trainingData;
-        private int[] trainingLabels;
+        private double[][] trainingLabelsOneHot;
         private int numClasses;
         private int numExamples;
         private int numFeatures;
@@ -27,9 +27,10 @@ class LogisticRegressionMultinomial {
         this.numExamples = trainingData.length;
         this.numFeatures = trainingData[0].length;
         this.trainingData = trainingData;
-        this.trainingLabels = trainingLabels;
+        this.trainingLabelsOneHot = MatrixMath.oneHotToDouble(trainingLabels, numClasses);
         this.weights = new double[numClasses][numFeatures];
         this.biases = new double[numClasses];
+        
         performGradientDescent();
     }
 
@@ -116,7 +117,7 @@ class LogisticRegressionMultinomial {
             getProbabilities(),
             MatrixMath.scalarMultiply(
                 -1, 
-                MatrixMath.oneHotToDouble(trainingLabels, numClasses)
+                trainingLabelsOneHot
             )
         );
     }
@@ -124,11 +125,11 @@ class LogisticRegressionMultinomial {
     /*
      * Return gradient of the cross-entropy loss function w.r.t. the weights
      */
-    private double[][] getWeightsGradient() {
+    private double[][] getWeightsGradient(double[][] delta) {
         double[][] rawWeightsGradient = MatrixMath.scalarMultiply(
             1.0/numExamples, 
             MatrixMath.multiply(
-                MatrixMath.transpose(getDelta()), 
+                MatrixMath.transpose(delta), 
                 trainingData
             )
         );
@@ -147,9 +148,8 @@ class LogisticRegressionMultinomial {
     /*
      * Return gradient of the cross-entropy loss function w.r.t. the biases
      */
-    private double[] getBiasesGradient() {
+    private double[] getBiasesGradient(double[][] delta) {
         double[] gradient = new double[numClasses];
-        double[][] delta = getDelta();
 
         // Accumulate row sums
         for (int i=0; i<numExamples; i++) {
@@ -199,8 +199,9 @@ class LogisticRegressionMultinomial {
     private void performGradientDescent() {
         for (int i=0; i<options.getMaxIter(); i++) {
             // Get gradients for weights and biases
-            double[][] weightsGradient = getWeightsGradient();
-            double[] biasesGradient = getBiasesGradient();
+            double[][] delta = getDelta(); // matrix containing Ŷ − oneHot(Y)
+            double[][] weightsGradient = getWeightsGradient(delta);
+            double[] biasesGradient = getBiasesGradient(delta);
             
             // Update weights
             weights = MatrixMath.add(
