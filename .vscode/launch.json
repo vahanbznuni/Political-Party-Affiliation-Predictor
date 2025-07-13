@@ -3,13 +3,16 @@
   "configurations": [
     {
       "type": "java",
+      "name": "_Test",
+      "request": "launch",
+      "mainClass": "_Test",
+      "projectName": "_1_Program_93495b83"
+    },
+    {
+      "type": "java",
       "name": "Debug active file",
       "request": "launch",
-
-      // VS Code macro that resolves to the class in the current editor
-      // (works so long as the class name == file name)
-      "mainClass": "${fileBasenameNoExtension}",
-
+      "mainClass": "${fileBasenameNoExtension}"
     }
   ]
 }

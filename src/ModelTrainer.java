@@ -1,4 +1,4 @@
-import smile.classification.LogisticRegression;
+// import smile.classification.LogisticRegression;
 import smile.validation.metric.Accuracy;
 import smile.validation.metric.Averaging;
 import smile.validation.metric.Precision;
@@ -14,6 +14,7 @@ public class ModelTrainer {
     private static final double[] DEFAULT_LAMBDA_RANGE = new double[]{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1};
     private static final double[] DEFAULT_TOLERANCE_RANGE = new double[]{1e-4, 1e-5, 1e-6};
     private static final int[] DEFAULT_MAX_ITER_RANGE = new int[]{100, 300, 900};
+    private static final int _TEST_NUM_CLASSES = 4;
 
 
     /*
@@ -52,21 +53,21 @@ public class ModelTrainer {
      * Wrapper class for holding a trained model, performance metrix set, and options set
      */
     public static class TrainedModel {
-        private final LogisticRegression.Multinomial model;
-        private final LogisticRegression.Options options;
+        private final LogisticRegressionMultinomial model;
+        private final LogisticRegressionMultinomial.Options options;
         private final ModelMetrics modelMetrics;
 
-        public TrainedModel(LogisticRegression.Multinomial model, LogisticRegression.Options options, ModelMetrics modelMetrics) {
+        public TrainedModel(LogisticRegressionMultinomial model, LogisticRegressionMultinomial.Options options, ModelMetrics modelMetrics) {
             this.model = model;
             this.options = options;
             this.modelMetrics = modelMetrics;
         }
 
-        public LogisticRegression.Multinomial getModel() {
+        public LogisticRegressionMultinomial getModel() {
             return model;
         }
 
-        public LogisticRegression.Options getOptions() {
+        public LogisticRegressionMultinomial.Options getOptions() {
             return options;
         }
 
@@ -126,14 +127,14 @@ public class ModelTrainer {
     /*
      * Get a packaged model with metrics, trained using provided options
      */
-    public TrainedModel getTrainedModel(LogisticRegression.Options options) { 
+    public TrainedModel getTrainedModel(LogisticRegressionMultinomial.Options options) { 
         // Get master training data set (from stratified data split)
         DataUnits.DataSet masterTrainingSet = masterDataBlock.getTrainSet();
         double[][] masterTrainingData = masterTrainingSet.getData();
         int[] masterTrainingLabels = masterTrainingSet.getLabels();
 
         // Train a model using the master training data and provided options
-        LogisticRegression.Multinomial finalModel = LogisticRegression.multinomial(masterTrainingData, masterTrainingLabels, options);
+        LogisticRegressionMultinomial finalModel = new LogisticRegressionMultinomial(masterTrainingData, masterTrainingLabels, _TEST_NUM_CLASSES, options);
         
         // Get master testing data set (from stratified data split)
         DataUnits.DataSet masterTestingSet = masterDataBlock.getTestSet();
@@ -158,7 +159,7 @@ public class ModelTrainer {
     */
     public TrainedModel getTrainedModel() {
         // Find hyper-parameters through tuning (using grid-search)
-        LogisticRegression.Options finalOptions = getTunedOptions();
+        LogisticRegressionMultinomial.Options finalOptions = getTunedOptions();
 
         // Call overloaded method to train and return final model using found hyperparameters
         return getTrainedModel(finalOptions);
@@ -168,7 +169,7 @@ public class ModelTrainer {
     /*
      * Perform model tuning using hyper-parameter grid search and get best parameters (i.e. options)
      */
-    public LogisticRegression.Options getTunedOptions() {
+    public LogisticRegressionMultinomial.Options getTunedOptions() {
         // Get master training data set (from stratified data split)
         DataUnits.DataSet masterTrainingSet = masterDataBlock.getTrainSet();
         double[][] masterTrainingData = masterTrainingSet.getData();
@@ -198,8 +199,8 @@ public class ModelTrainer {
                         int[] validationTrainingLabels = validationTrainingSet.getLabels();
         
                         // Train a model using the validation training data and current options
-                        LogisticRegression.Options options = new LogisticRegression.Options(lambda, tolerance, maxIter);
-                        LogisticRegression.Multinomial model = LogisticRegression.multinomial(validationTrainingData, validationTrainingLabels, options);
+                        LogisticRegressionMultinomial.Options options = new LogisticRegressionMultinomial.Options(lambda, tolerance, maxIter);
+                        LogisticRegressionMultinomial model = new LogisticRegressionMultinomial(validationTrainingData, validationTrainingLabels, _TEST_NUM_CLASSES, options);
                         
                         // Get validation testing data set (from 2nd stratified data split)
                         DataUnits.DataSet validationTestingSet = validationDataBlock.getTestSet();
@@ -224,7 +225,7 @@ public class ModelTrainer {
             }
         }
 
-        return new LogisticRegression.Options(bestLambda, bestTolerance, bestMaxIter);
+        return new LogisticRegressionMultinomial.Options(bestLambda, bestTolerance, bestMaxIter);
     }
 
 

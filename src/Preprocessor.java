@@ -21,9 +21,9 @@ public class Preprocessor {
 
         // Package into new DataBlocks
         DataUnits.DataSet transformedTrainSet = new DataUnits.DataSet(
-            trainScaledWeighted, rawDataBlock.getTrainSet().getLabels());
+            trainScaled, rawDataBlock.getTrainSet().getLabels());
         DataUnits.DataSet transformedTestSet = new DataUnits.DataSet(
-            testScaledWeighted, rawDataBlock.getTestSet().getLabels());
+            testScaled, rawDataBlock.getTestSet().getLabels());
 
         
         DataUnits.DataBlock processedDataBlock = new DataUnits.DataBlock(transformedTrainSet, transformedTestSet);

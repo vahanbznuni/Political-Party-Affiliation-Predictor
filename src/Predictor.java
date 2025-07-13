@@ -1,4 +1,4 @@
-import smile.classification.LogisticRegression;
+// import smile.classification.LogisticRegression;
 
 public class Predictor {
     private DataStore dataStorage;
@@ -29,7 +29,7 @@ public class Predictor {
                 if (trainedModel == null) {
                     throw new IllegalArgumentException("Cannot reuse options when trainedModel is null");
                 }
-                LogisticRegression.Options currentOptions = this.trainedModel.getOptions();
+                LogisticRegressionMultinomial.Options currentOptions = this.trainedModel.getOptions();
                 this.trainedModel = trainer.getTrainedModel(currentOptions);
                 break;
             default:
