@@ -77,7 +77,6 @@ public class StratifiedDataSplitter {
 
 
     public DataUnits.DataIndicesSet[] getStratifiedFolds() {
-        int dataSize = masterLabels.length;
         DataUnits.DataIndicesSet[] indicesSets = new DataUnits.DataIndicesSet[numberOfFolds];
 
         // Initialize a list of lists, each of which will hold 
