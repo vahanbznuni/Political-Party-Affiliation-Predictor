@@ -8,6 +8,9 @@ public class Controller {
      */
     public static void execute() {
 
+        System.out.println("\n>>>Program Started. Please allow up to a minute for loading");
+        System.out.println(">>>Loading...\n");
+
         // Initialize data input
         DataStore dataStore = new DataStore(DATA_FILE_NAME);
         try {

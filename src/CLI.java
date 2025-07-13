@@ -204,6 +204,7 @@ public class CLI {
                     userInput = -1;
                     continue;
                 } finally {
+                    System.out.print("Press ENTER to proceed: ");
                      flushScanner();
                 }
             }
