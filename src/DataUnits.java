@@ -41,6 +41,25 @@ public class DataUnits {
     }
 
 
+    static class DataIndicesSet {
+        private final int[] trainIndices;
+        private final int[] testIndices;
+
+        public DataIndicesSet(int[] trainIndices, int[] testIndices) {
+            this.trainIndices = trainIndices;
+            this.testIndices = testIndices;
+        }
+
+        public int[] getTrainIndices() {
+            return trainIndices;
+        }
+
+        public int[] getTestIndices() {
+            return testIndices;
+        }
+    }
+    
+
     static class ProcessedDataPacket {
         private final DataBlock processedDataBlock;
         private final Scaler.NormalDistParams normalDistParams;

@@ -4,6 +4,7 @@ public class _Test {
 
     public static void test1() {
         System.out.println("\n");
+        System.out.println("Started Test1");
 
         String fileName = "data/data_1000_realistic.csv";
         DataStore testDataStore = new DataStore(fileName);
@@ -171,6 +172,11 @@ public class _Test {
             }
             System.out.println(rowTotal);
         }
+    }
+
+
+    public static void test10() {
+        
     }
 
     public static void printMatrix(double[][] matrix) {

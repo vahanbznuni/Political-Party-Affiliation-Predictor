@@ -14,7 +14,7 @@ public class ModelTrainer {
      * test and train sets, and save the packaged data block as an instanced variable
      */
     public ModelTrainer(double[][] masterData, int[] masterLabels, TrainerOptions option) {
-        DataUnits.DataBlock rawDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS).getDataBlock(0); 
+        DataUnits.DataBlock rawDataBlock = new StratifiedDataSplitter(masterData, masterLabels, DEFAULT_NUM_FOLDS, _TEST_NUM_CLASSES).getDataBlock(0); 
         DataUnits.DataBlock finalDataBlock = rawDataBlock;
         
         // Applying processing as selected
@@ -186,7 +186,7 @@ public class ModelTrainer {
         int[] masterTrainingLabels = masterTrainingSet.getLabels();
 
         // Split traiing data further into training and testing subsets for validation
-        StratifiedDataSplitter validationSplitter = new StratifiedDataSplitter(masterTrainingData, masterTrainingLabels, DEFAULT_NUM_FOLDS);
+        StratifiedDataSplitter validationSplitter = new StratifiedDataSplitter(masterTrainingData, masterTrainingLabels, DEFAULT_NUM_FOLDS, _TEST_NUM_CLASSES);
         
 
 
