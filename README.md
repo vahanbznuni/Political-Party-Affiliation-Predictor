@@ -13,8 +13,8 @@ This project has a ready-to-run Replit. To try the CLI:
 
 1. Open: **https://replit.com/@vahan2/Political-Party-Affiliation-Predictor#README.md**
 2. Click **Remix this app** (you can sign in with Google/Gmail).
-3. Confirm name/settings of your copy (pick any name and use defaults).
-4. In your copy, click the green **Run** button.
+3. Confirm name/settings of your copy (you can confirm all the defaults).
+4. In your copy, click the green **Run** button at the top left.
 5. Follow the prompts in the terminal. **Please note**: it can take up to a minute for ML model to finish training and program to start.
 
 ---
