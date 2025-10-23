@@ -5,7 +5,11 @@
 ![Status](https://img.shields.io/badge/status-student_project-blue)
 ![Java](https://img.shields.io/badge/Java-Pure%20Java-orange)
 ![ML](https://img.shields.io/badge/ML-Logistic%20Regression-green)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/<vahanbznuni>/<Political-Party-Affiliation-Predictor>)
+
+
+▶ **DEMO**: Run it in GitHub Codespaces (requires a free GitHub account):
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/vahanbznuni/Political-Party-Affiliation-Predictor)
 
 
 ## 🔎 Recruiter TL;DR
