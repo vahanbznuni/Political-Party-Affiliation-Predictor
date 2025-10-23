@@ -1,0 +1,20 @@
+{
+  "name": "Java 21",
+  "image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
+  "postCreateCommand": "mkdir -p out && javac -cp 'lib/*' -d out src/*.java",
+  "customizations": {
+    "vscode": {
+      "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+          {
+            "label": "Run app",
+            "type": "shell",
+            "command": "java -cp 'lib/*:out' Main",
+            "problemMatcher": []
+          }
+        ]
+      }
+    }
+  }
+}
