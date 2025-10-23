@@ -7,10 +7,17 @@
 ![ML](https://img.shields.io/badge/ML-Logistic%20Regression-green)
 
 
-▶ **DEMO**: Run it in GitHub Codespaces (requires a free GitHub account):
+## ▶ Try it on Replit (free)
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/vahanbznuni/Political-Party-Affiliation-Predictor)
+This project has a ready-to-run Replit. To try the CLI:
 
+1. Open: **https://replit.com/@vahan2/Political-Party-Affiliation-Predictor#README.md**
+2. Click **Remix this app** (you can sign in with Google/Gmail).
+3. Confirm name/settings of your copy (pick any name and use defaults).
+4. In your copy, click the green **Run** button.
+5. Follow the prompts in the terminal. **Please note**: it can take up to a minute for ML model to finish training and program to start.
+
+---
 
 ## 🔎 Recruiter TL;DR
 - **Pure Java** implementation of **multinomial logistic regression** (no ML frameworks).
